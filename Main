@@ -1,0 +1,128 @@
+import datetime
+import random
+import requests
+
+# Dictionnaire de commandes et fonctions associées
+commands = {
+    "/help": {
+        "description": "Affiche la liste des commandes disponibles.",
+        "function": lambda: "Liste des commandes disponibles : /help, /heure, /date, /météo, /blague, /histoire, /ping, /info, /support et /exit"
+    },
+    "/heure": {
+        "description": "Affiche l'heure actuelle.",
+        "function": lambda: f"Il est {datetime.datetime.now().hour} heures et {datetime.datetime.now().minute} minutes."
+    },
+    "/date": {
+        "description": "Affiche la date actuelle.",
+        "function": lambda: f"Aujourd'hui nous sommes le {datetime.datetime.now().day}/{datetime.datetime.now().month}/{datetime.datetime.now().year}."
+    },
+    "/météo": {
+        "description": "Affiche la météo actuelle.",
+        "function": lambda: get_weather()
+    },
+    "/blague": {
+        "description": "Affiche une blague aléatoire.",
+        "function": lambda: get_joke()
+    },
+    "/histoire": {
+        "description": "Raconte une histoire aléatoire.",
+        "function": lambda: get_story()
+    },
+    "/ping": {
+        "description": "Vérifie si le bot est actif.",
+        "function": lambda: "Pong !"
+    },
+    "/info": {
+        "description": "Fournit des informations sur le chatbot.",
+        "function": lambda: "Je suis un chatbot conçu pour vous aider avec diverses commandes."
+    },
+    "/support": {
+        "description": "Fournit des informations de support.",
+        "function": lambda: "Pour obtenir du support, veuillez contacter notre équipe à support@exemple.com."
+    },
+    "/exit": {
+        "description": "Termine la conversation avec le chatbot.",
+        "function": lambda: "Merci de votre visite. À bientôt !"
+    }
+}
+
+# Fonctions utilitaires pour l'IA
+
+def get_weather():
+    # Fonction pour obtenir les données météo à partir d'une API (exemple fictif)
+    # Remplacez l'URL par une API météo réelle et traitez les données JSON retournées
+    url = "https://api.example.com/weather"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        temperature = data.get('temperature', 'non disponible')
+        conditions = data.get('conditions', 'non disponible')
+        return f"La météo actuelle : Température {temperature}°C, Conditions : {conditions}."
+    except requests.exceptions.RequestException as e:
+        return f"Désolé, je ne peux pas récupérer les données météo pour le moment. Erreur : {str(e)}"
+
+def get_joke():
+    # Fonction pour obtenir une blague aléatoire à partir d'une API (exemple fictif)
+    # Remplacez l'URL par une API de blagues réelle
+    url = "https://api.example.com/jokes/random"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        return data.get('joke', 'Je n\'ai pas de blague pour le moment.')
+    except requests.exceptions.RequestException as e:
+        return f"Désolé, je ne peux pas récupérer de blague pour le moment. Erreur : {str(e)}"
+
+def get_story():
+    # Fonction pour obtenir une histoire aléatoire (exemple fictif)
+    # Vous pouvez remplacer par une base de données d'histoires ou une API d'histoires réelle
+    stories = [
+        "Il était une fois, dans un royaume lointain...",
+        "Dans une galaxie très lointaine, un jeune héros se leva...",
+        "Au fond de l'océan, les créatures marines vivaient en harmonie..."
+    ]
+    return random.choice(stories)
+
+# Fonction principale du chatbot
+
+def chatbot():
+    context = {
+        'name': None,
+        'weather_location': None
+    }
+    print("Bonjour ! Comment puis-je vous aider aujourd'hui ?")
+    while True:
+        user_input = input("Vous: ").strip().lower()
+        
+        # Vérification de la commande /exit pour quitter
+        if user_input == "/exit":
+            print("IA:", commands[user_input]["function"]())
+            break
+        
+        # Vérification de la commande /help pour afficher l'aide
+        if user_input == "/help":
+            print("IA:", commands[user_input]["function"]())
+            continue
+        
+        # Vérification si la commande est dans le dictionnaire de commandes
+        if user_input in commands:
+            response = commands[user_input]["function"]()
+            print("IA:", response)
+        else:
+            # Traitement des autres types de questions
+            if "quel est ton nom" in user_input or "qui es-tu" in user_input:
+                print("IA: Je suis un assistant virtuel conçu pour vous aider.")
+            elif "météo" in user_input:
+                if context['weather_location']:
+                    print("IA:", get_weather(context['weather_location']))
+                else:
+                    print("IA: Pour quelle ville voulez-vous connaître la météo ?")
+                    location = input("Vous: ").strip()
+                    context['weather_location'] = location
+                    print("IA:", get_weather(location))
+            else:
+                print("IA: Désolé, je ne comprends pas. Tapez /help pour voir les commandes disponibles.")
+
+# Exemple d'utilisation du chatbot
+chatbot()
